@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tv.setGravity(Gravity.CENTER_VERTICAL);
         tv.setLines(2);
         tv.setBackgroundResource(R.drawable.bg_tag);
-        flowLayout.addView(tv, lp);
+        flowLayout.addView(tv,0, lp);
     }
 
     public static int dip2px(Context context, float dpValue) {

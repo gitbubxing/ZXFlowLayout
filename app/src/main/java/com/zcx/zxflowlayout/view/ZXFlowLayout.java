@@ -2,6 +2,7 @@ package com.zcx.zxflowlayout.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -29,17 +30,57 @@ public class ZXFlowLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        for (int i = 0; i < getChildCount(); i++) {
-            //viewGroup中所有的child
-            View childView = getChildAt(i);
-            measureChild(childView, widthMeasureSpec, heightMeasureSpec);
+        int paddingLeft= getPaddingLeft();
+        int paddingRight = getPaddingRight();
+        int paddingTop= getPaddingTop();
+        int paddingBottom= getPaddingBottom();
+        int lineY= paddingTop;
+        int lineUse= paddingLeft+paddingRight;
+        int lineHeight = 0;
+        int widthSize= MeasureSpec.getSize(widthMeasureSpec);
+
+        for (int i = 0; i <getChildCount() ; i++) {
+            View  childView= getChildAt(i);
+            if (childView.getVisibility()==View.GONE){
+                continue;
+            }
+            int spaceWidth= 0;
+            int spaceHeight=0;
+            LayoutParams  params= childView.getLayoutParams();
+            if (params instanceof  MarginLayoutParams){
+                MarginLayoutParams p= (MarginLayoutParams) params;
+                spaceWidth= p.leftMargin+p.rightMargin;
+                spaceHeight= p.topMargin+p.bottomMargin;
+                measureChildWithMargins(childView,widthMeasureSpec ,0,heightMeasureSpec,lineY);
+            }else
+            {
+                measureChild(childView,widthMeasureSpec,heightMeasureSpec);
+            }
+            //每一个view的宽高
+            spaceWidth += childView.getMeasuredWidth();
+            spaceHeight += childView.getMeasuredHeight();
+            if (spaceWidth+lineUse > widthSize){
+                //换下一行
+                lineY+= lineHeight;
+                //重置
+                lineUse = paddingLeft+paddingRight;
+            }
+
+            if (spaceHeight > lineHeight) {
+                lineHeight = spaceHeight;
+
+            }
+            lineUse += spaceWidth;
         }
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-        setMeasuredDimension(
-                widthSize,
-                heightSize
+        int heightSize= MeasureSpec.getSize(heightMeasureSpec);
+        Log.i(TAG,"lineY===>"+lineY);
+        Log.i(TAG,"lineHeight===>"+lineHeight);
+        Log.i(TAG,"paddingBottom===>"+paddingBottom);
+
+        setMeasuredDimension(widthSize,
+                MeasureSpec.getMode(heightMeasureSpec)==MeasureSpec.EXACTLY ? heightSize: lineY + lineHeight + paddingBottom
         );
+
     }
 
     @Override
